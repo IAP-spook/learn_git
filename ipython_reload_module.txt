@@ -1,0 +1,7 @@
+'''
+To reload a module in ipython env
+'''
+
+import sys
+del sys.modules['module_name']
+import 'module_name'

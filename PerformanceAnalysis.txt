@@ -1,0 +1,30 @@
+#1. 简单的时间分析
+print
+time.time()
+
+python -m timeit -n x -r y -s "***"
+上述命令可简单测试python语句用时，循环次数为x，重复次数为y
+#2. 利用linux系统自带的time函数---统计程序用时
+/usr/bin/time -l -p python *.py
+
+#3.用cProfile 详细分析程序各模块耗时
+
+pip install cProfile
+
+python -m cProfile -s cumulatve *.py
+
+python -m cPorfile -o profile.stats *.py
+
+import pstats
+p = pstats.Stats('profile.stats')
+p.sort_stats('cumulative')
+p.print_stats()
+
+#4. 用line_profiler逐行分析程序
+
+pip isntall line_profiler
+
+需要对源程序修改，增加@profile装饰器，然后
+
+kernprof -l -v *.py
+然后结合ipython的%timeit 或者用python -m timeit来优化每个语句

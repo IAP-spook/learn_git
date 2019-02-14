@@ -1,0 +1,56 @@
+# SSH Anti-Tunnel Tech
+# Wangyinan 2018.07
+'''
+A is the server on public Internet with a confirmed IP address,like wyn@159.226.234.61
+B is the terminal without confirmed IP,but connected to Internet
+C is a computer can get on Internet
+
+Using anti-tunnel tech one can ssh -p 1234(exp.) user_B@A.site
+'''
+#==========Step 1 Configuration on A Server==========================
+1) Edit /etc/ssh/sshd_config(公网服务器A打开sshd服务的GatewayPorts): 
+	GatewayPorts yes
+systemctl restart sshd
+2) Open a socket of A ,such as 1314 socket of 159.226.234.61(开放A服务器的一个端口用于跳转)
+    Edit iptables of A
+
+#==========Step 2  Configuration on B Device==========================
+
+1) Install autossh on B device(电脑B需要安装autossh服务，用于保持ssh隧道常连接):
+	yum install autossh 
+2) set no_passwd to make B to A(设置B连接A服务器的免密码登录):
+	run setip_skippasswd.sh on B
+3) add autossh service to B system(在B上把autossh作为服务启动)
+	write /lib/systemd/system/autosshd.service
+  1 [Unit]
+  2 Description=Auto SSH Tunnel
+  3 After=network-online.target
+  4 [Service]
+  5 User=root
+  6 Type=simple
+  7 ExecStart=/usr/local/bin/autossh -p 22 -M 6777 -NR 1314:localhost:22 wyn@159.226.234.61
+  8 ExecReload=/bin/kill -HUP $MAINPID
+  9 KillMode=process
+ 10 Restart=always
+ 11 [Install]
+ 12 WantedBy=multi-user.target
+ 13 WantedBy=graphical.target
+
+ set this service file 644 authority
+ chmod 644 autosshd.service
+ 4) start autossh service(在B上启动autossh服务)
+ 	systemctl start autossh
+	or
+	restart
+	or
+	service autossh start
+
+#==================Test Method==============
+ On a C device:
+ ssh -p 1314 username(B)@ip(A)
+ enter passwd for B on B Device
+
+# Auto sockets forwarding(动态端口转发)：
+ ssh -p 1314 -qngfNTD 7677 userb@a.site
+
+https://blog.csdn.net/lidongshengajz/article/details/73482908

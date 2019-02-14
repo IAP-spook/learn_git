@@ -1,0 +1,65 @@
+一般情况下：
+1个字节（byte）----8位（bit）1111 1111= 256
+
+进制转换：
+各种进制的字符串转换为整型：
+
+2进制字符串-10进制整数：int(str,2),exp: str='0110',int('0110',2)=6
+8进制字符串-10进制整数：int(str,8)
+16进制字符串-10进制整数：int(str,16)
+
+10进制整数转为其他进制字符串：
+bin(int)-- 10进制-2进制
+oct(int)-- 10进制-8进制
+hex(int)-- 10进制-16进制
+
+一个16进制数，如'0xffff'，一个字符串为4位，字符串个数*4位/8=字节数
+*# 2个16进制字符串为1个字节
+
+
+ord('字符')获取该字符ASCII码
+chr(数字）获取该ASCII码对应字符
+
+# linux系统最大进程数
+cd /proc/sys/kernel
+thread-max:物理内存决定的系统进程数上限制，beaglebone为6860
+pid_max:进程ID的上限，默认为32768
+ulimit -u:RLIMIT_NPROC:单个用户允许的最大进程数上限,系统默认为thread-max的一半，beaglebone为6860
+##########
+邓峰，JDAS:
+/lustre/ytpan/OCO2-Inversion_EXP/JDAS_IS/JDAS/atmo/model_GEOSChem/GEOSChem_src/GeosCore
+restart_mod.F
+main.F
+/lustre/ytpan/OCO2-Inversion_EXP/Scripts_Extract/write_mean_3d_fld.py
+
+-----About Supervisor----
+Pi IP:169.254.159.150
+1)pip install supervisor
+2)echo_supervisord_conf>/etc/supervisord.conf
+3)supervisord.conf
+[program:sensor_server]
+command=/usr/bin/python /root/UDP_server/udp_server_allsensors.py
+autostart=true
+autorestart=true
+user=root
+stdout_logfile=/root/UDP_server/sensor.log
+4)添加到自启动
+首先在/lib/systemd/system/supervisord.service写入文件：
+[Unit]
+Description=Process Monitoring and Control Daemon
+After=rc-local.service
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/supervisord -c /etc/supervisord.conf
+SysVStartPriority=99
+
+[Install]
+WantedBy=multi-user.target
+
+1）systemctl enable supervisord.service
+如果修改了/etc/supervisord.conf,使用:systemctl daemon-reload
+2) systemctl start/restart/stop supervisor.service
+3)状态查询：systemctl status supervisord.service
+-------Done-------------
+
